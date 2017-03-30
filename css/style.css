@@ -113,6 +113,10 @@ button:hover {
 	background: #184c62;
 }
 
+select option[disabled] {
+    display: none;
+}
+
 /* ================================= 
   Page Styles
 ==================================== */
