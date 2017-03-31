@@ -1,48 +1,54 @@
+// Focus Name input on page load
+$('#name').focus();
+
 // "Job Role" section of the form
-$('#other-title').hide();
+const $otherTitle = $('#other-title');
+$('#other-title').remove();
 $('#title').change(() => {
 	const val = $('#title option:selected').text();
 	if(val === 'Other') {
-		$('#other-title').show();
+		$('#title').parent().append($otherTitle);
 	}
 	else {
-		$('#other-title').hide();
+		$('#other-title').remove();
 	}
 });
 
-// "T-Shirt Info" section of the form
-/* 
-For the T-Shirt color menu, only display the color options that match the design selected in the "Design" menu.
-If the user selects "Theme - JS Puns" then the color menu should only display "Cornflower Blue," "Dark Slate Grey," and "Gold."
-If the user selects "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
-*/
-
-// First hide the color section
+// First, hide the color section
 $('#colors-js-puns').hide();
+// Second, change the text to only show the color name
+const $colorOpts = $('#color option');
+const regEx = /\s*\(.*/;
+for(let i = 0; i < $colorOpts.length; i += 1) {
+	const colorName = $colorOpts[i].innerHTML;
+	$colorOpts[i].innerHTML = colorName.replace(regEx, '');
+}
+// Third, save the groups for later and remove them from the page
+const $jsPunsOpts = $colorOpts.slice(0,3);
+const $iHeartJSOpts = $colorOpts.slice(3,6);
+$colorOpts.remove();
 
-// Next change the text of the colors
-
+// Finally, on t-shirt design change, add the correct group of colors back
 $('#design').change(() => {
 	const val = $('#design option:selected').text();
+	$('#colors-js-puns').show();
+	$colorOpts.remove();
 	if(val === 'Theme - JS Puns') {
-		$('#colors-js-puns').show();
-		$('#color option[value=cornflowerblue]').attr('disabled', false);
-		$('#color option[value=darkslategrey]').attr('disabled', false);
-		$('#color option[value=gold]').attr('disabled', false);
-		$('#color option[value=tomato]').attr('disabled', true);
-		$('#color option[value=steelblue]').attr('disabled', true);
-		$('#color option[value=dimgrey]').attr('disabled', true);
+		$('#color').append($jsPunsOpts);
 	}
-	else if(val === 'Theme - I ♥ JS') {
-		$('#colors-js-puns').show();
-		$('#color option[value=tomato]').attr('disabled', false);
-		$('#color option[value=steelblue]').attr('disabled', false);
-		$('#color option[value=dimgrey]').attr('disabled', false);
-		$('#color option[value=cornflowerblue]').attr('disabled', true);
-		$('#color option[value=darkslategrey]').attr('disabled', true);
-		$('#color option[value=gold]').attr('disabled', true);
+	else if(val === 'Theme - I \u2665 JS') {
+		$('#color').append($iHeartJSOpts);
 	}
 	else {
 		$('#colors-js-puns').hide();
 	}
+	$('#color')[0].selectedIndex = 0;
 });
+
+/*
+”Register for Activities” section of the form:
+Some events are at the same time as others. If the user selects a workshop, don't allow selection of a workshop at the same date and time -- you should disable the checkbox and visually indicate that the workshop in the competing time slot isn't available.
+When a user unchecks an activity, make sure that competing activities (if there are any) are no longer disabled.
+As a user selects activities, a running total should display below the list of checkboxes. For example, if the user selects "Main Conference", then Total: $200 should appear. If they add 1 workshop, the total should change to Total: $300.
+*/
+
