@@ -47,8 +47,24 @@ $('#design').change(() => {
 
 /*
 ”Register for Activities” section of the form:
-Some events are at the same time as others. If the user selects a workshop, don't allow selection of a workshop at the same date and time -- you should disable the checkbox and visually indicate that the workshop in the competing time slot isn't available.
-When a user unchecks an activity, make sure that competing activities (if there are any) are no longer disabled.
 As a user selects activities, a running total should display below the list of checkboxes. For example, if the user selects "Main Conference", then Total: $200 should appear. If they add 1 workshop, the total should change to Total: $300.
 */
+
+function toggleActivity(toggleName, effectedName) {
+	$('input[name=' + toggleName + ']').change(() => {
+	if($('input[name=' + toggleName + ']').is(':checked')) {
+		$('input[name=' + effectedName + ']').prop('disabled', true);
+		$('input[name=' + effectedName + ']').parent().addClass('disabled');
+	}
+	else {
+		$('input[name=' + effectedName + ']').prop('disabled', false);
+		$('input[name=' + effectedName + ']').parent().removeClass('disabled');
+	}
+});
+}
+
+toggleActivity('js-frameworks', 'express');
+toggleActivity('express', 'js-frameworks');
+toggleActivity('js-libs', 'node');
+toggleActivity('node', 'js-libs');
 
