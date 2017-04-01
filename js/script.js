@@ -14,6 +14,7 @@ $('#title').change(() => {
 	}
 });
 
+// "T-Shirt Info" section of the form
 // First, hide the color section
 $('#colors-js-puns').hide();
 // Second, change the text to only show the color name
@@ -45,26 +46,45 @@ $('#design').change(() => {
 	$('#color')[0].selectedIndex = 0;
 });
 
-/*
-”Register for Activities” section of the form:
-As a user selects activities, a running total should display below the list of checkboxes. For example, if the user selects "Main Conference", then Total: $200 should appear. If they add 1 workshop, the total should change to Total: $300.
-*/
+// "Activities" section of the form
+let total = 0;
+const $totalHTML = $('<div class="total"><p></p></div>');
+$('.activities').append($totalHTML);
 
-function toggleActivity(toggleName, effectedName) {
-	$('input[name=' + toggleName + ']').change(() => {
-	if($('input[name=' + toggleName + ']').is(':checked')) {
-		$('input[name=' + effectedName + ']').prop('disabled', true);
-		$('input[name=' + effectedName + ']').parent().addClass('disabled');
-	}
-	else {
-		$('input[name=' + effectedName + ']').prop('disabled', false);
-		$('input[name=' + effectedName + ']').parent().removeClass('disabled');
-	}
-});
+function toggleActivity(toggleName, price, hasConflict, effectedName) {
+	$('.activities input[name=' + toggleName + ']').change(() => {
+		if($('.activities input[name=' + toggleName + ']').is(':checked')) {
+			total += price;
+			$('.total p').text('Total: $' + total);
+			if(hasConflict) {
+				disableActivity(effectedName);
+			}
+		}
+		else {
+			total -= price;
+			$('.total p').text('Total: $' + total);
+			if(hasConflict) {
+				enableActivity(effectedName);
+			}
+		}
+	});
 }
 
-toggleActivity('js-frameworks', 'express');
-toggleActivity('express', 'js-frameworks');
-toggleActivity('js-libs', 'node');
-toggleActivity('node', 'js-libs');
+function disableActivity(effectedName) {
+	$('input[name=' + effectedName + ']').prop('disabled', true);
+	$('input[name=' + effectedName + ']').parent().addClass('disabled');
+}
+
+function enableActivity(effectedName) {
+	$('input[name=' + effectedName + ']').prop('disabled', false);
+	$('input[name=' + effectedName + ']').parent().removeClass('disabled');
+}
+
+toggleActivity('all', 200, false, '');
+toggleActivity('js-frameworks', 100, true, 'express');
+toggleActivity('express', 100, true, 'js-frameworks');
+toggleActivity('js-libs', 100, true, 'node');
+toggleActivity('node', 100, true, 'js-libs');
+toggleActivity('build-tools', 100, false, '');
+toggleActivity('npm', 100, false, '');
 
