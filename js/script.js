@@ -120,6 +120,18 @@ addActivityListener('node', 100, 'js-libs');
 addActivityListener('build-tools', 100);
 addActivityListener('npm', 100);
 
+function checkActivities() {
+	const $activities = $('.activities input');
+	if($activities.filter(':checked').length === 0) {
+		$('.activities legend').after($('<p class="error" style="margin-top: 0px; color: red">Please select at least one activity.</p>'));
+		return false;
+	}
+	else {
+		$('.activities > .error').remove();
+		return true;
+	}
+}
+
 // 'Payment Info' section
 $('#credit-card').next().attr('id', 'paypal');
 $('#credit-card').next().next().attr('id', 'bitcoin');
@@ -141,13 +153,13 @@ $payment.change(() => {
 			$bitcoinDiv.hide();
 			break;
 		case 'credit card':
-			$ccDiv.show()
+			$ccDiv.show();
 			$paypalDiv.hide();
 			$bitcoinDiv.hide();
 			break;
 		case 'paypal':
-			$ccDiv.hide()
-			$paypalDiv.show()
+			$ccDiv.hide();
+			$paypalDiv.show();
 			$bitcoinDiv.hide();
 			break;
 		case 'bitcoin':
@@ -156,16 +168,80 @@ $payment.change(() => {
 			$bitcoinDiv.show();
 			break;
 		default:
-			$ccDiv.show()
+			$ccDiv.show();
 			$paypalDiv.hide();
 			$bitcoinDiv.hide();
 			break;
 	}
 });
 
+function checkCreditCardNumber() {
+	const $ccInput = $('#cc-num');
+	const ccNumRegEx = /[0-9]{13,16}/;
+	const ccVal = $ccInput.val();
+	if(!ccNumRegEx.test(ccVal)) {
+		$ccInput.css('border-color', 'red');
+		return false;
+	}
+	else {
+		$ccInput.css('border-color', '#c1deeb');
+		return true;
+	}
+}
 
+function checkZipCode() {
+	const zipRegEx = /[0-9]{5}/;
+	const $zipInput = $('#zip');
+	const zipVal = $zipInput.val();
+	if(!zipRegEx.test(zipVal)) {
+		$zipInput.css('border-color', 'red');
+		return false;
+	}
+	else {
+		$zipInput.css('border-color', '#c1deeb');
+		return true;
+	}
+}
 
+function checkCVV() {
+	const cvvRegEx = /[0-9]{3}/;
+	const $cvvInput = $('#cvv');
+	const cvvVal = $cvvInput.val();
+	if(!cvvRegEx.test(cvvVal)) {
+		$cvvInput.css('border-color', 'red');
+		return false;
+	}
+	else {
+		$cvvInput.css('border-color', '#c1deeb');
+		return true;
+	}
+}
 
+function runChecks() {
+	if(!checkName())
+		return false;
+	else if(!checkEmail())
+		return false;
+	else if(!checkActivities())
+		return false;
+	else if(!checkCreditCardNumber())
+		return false;
+	else if(!checkZipCode())
+		return false;
+	else if(!checkCVV())
+		return false;
+	else
+		return true;
+}
+
+$('form').submit((ev) => {
+	if(runChecks()) {
+		return;
+	}
+	else {
+		ev.preventDefault();
+	}
+});
 
 
 

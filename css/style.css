@@ -113,6 +113,10 @@ button:hover {
 	background: #184c62;
 }
 
+.total p {
+	margin-bottom: 0px;
+}
+
 .disabled {
    color: darkgrey;
 }
