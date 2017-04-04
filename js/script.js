@@ -1,16 +1,23 @@
-// "Basic Info" section
-const $nameInput = $('#name');
-// Focus the Name input field when document loads
-$nameInput.focus();
+/* This script contains all the functionality for the interactive form.
+   The JavaScript is organized by fieldset section, in the order it appears in the HTML.
+   After all section functionality is completed, the rest of the script contains form validation functionality
+*/
 
-// "Job Role" section of the form
+// ************************************ //
+//           BASIC INFO SECTION         //
+// ************************************ //
+
+const $nameInput = $('#name');
 const $title = $('#title');
 const $otherTitle = $('#other-title');
+
+// Focus the Name input field when document loads
+$nameInput.focus();
 
 // Remove the Other Title input field once document loads
 $otherTitle.remove();
 
-// Event listener for adding Other Title input field when user selects "Other"
+// Listener for adding Other Title input field when user selects "Other"
 $title.change(() => {
 	const val = $('#title option').filter(':selected').val();
 	if(val === 'other') {
@@ -21,7 +28,10 @@ $title.change(() => {
 	}
 });
 
-// "T-Shirt Info" section of the form
+// ************************************ //
+//         T-SHIRT INFO SECTION         //
+// ************************************ //
+
 const $colorsDiv = $('#colors-js-puns');
 const $colorSelect = $('#color');
 const $colorOpts = $('#color option');
@@ -29,16 +39,17 @@ const $jsPunsOpts = $colorOpts.slice(0,3);
 const $iHeartJSOpts = $colorOpts.slice(3,6);
 const designTypeRegEx = /\s*\(.*/;
 
-// First, hide the color section
+// Hide the color section
 $colorsDiv.hide();
 
-// Second, change the text to only show the color name
+// Change the text to only show the color name
+// i.e. Removes the text ' (JS Puns shirt only)' from each color
 for(let i = 0; i < $colorOpts.length; i += 1) {
 	const colorName = $colorOpts[i].innerHTML;
 	$colorOpts[i].innerHTML = colorName.replace(designTypeRegEx, '');
 }
 
-// Finally, on t-shirt design change, add the correct group of colors back
+// On t-shirt design change, add the correct group of colors back
 $('#design').change(() => {
 	const val = $('#design option').filter(':selected').val();
 	
@@ -59,16 +70,31 @@ $('#design').change(() => {
 	$colorSelect.prop('selectedIndex', 0);
 });
 
-// "Activities" section of the form
-let total = 0;
-// append html elements that displays the total cost of activities
+// ************************************ //
+//    REGISTER FOR ACTIVITIES SECTION   //
+// ************************************ //
+
 const $totalHTML = $('<div class="total"><p></p></div>');
+let total = 0;
+
+// append html elements that displays the total cost of activities
 $('.activities').append($totalHTML);
+
+// Adds all the listeners for the activities checkboxes
+addActivityListener('all', 200);
+addActivityListener('js-frameworks', 100, 'express');
+addActivityListener('js-libs', 100, 'node');
+addActivityListener('express', 100, 'js-frameworks');
+addActivityListener('node', 100, 'js-libs');
+addActivityListener('build-tools', 100);
+addActivityListener('npm', 100);
 
 // EFFECTS: adds a change listener to an activity checkbox,
 //          when checked, calculates the price of the total and updates the html text
 function addActivityListener(activityName, price, conflictName = '') {
+	
 	const $activity = $('.activities input[name=' + activityName + ']');
+	
 	$activity.change(() => {
 		if($activity.is(':checked')) {
 			total += price;
@@ -90,7 +116,9 @@ function addActivityListener(activityName, price, conflictName = '') {
 
 // EFFECTS: toggles the activity to be enabled or disabled based on "enable" boolean
 function toggleActivity(activityName, enable) {
+	
 	const $activity = $('.activities input[name=' + activityName + ']');
+	
 	if(enable) {
 		$activity.prop('disabled', false);
 		$activity.parent().removeClass('disabled');
@@ -99,43 +127,28 @@ function toggleActivity(activityName, enable) {
 		$activity.prop('disabled', true);
 		$activity.parent().addClass('disabled');
 	}
+
 }
 
-// Adds all the listeners for the activities checkboxes
-addActivityListener('all', 200);
-addActivityListener('js-frameworks', 100, 'express');
-addActivityListener('js-libs', 100, 'node');
-addActivityListener('express', 100, 'js-frameworks');
-addActivityListener('node', 100, 'js-libs');
-addActivityListener('build-tools', 100);
-addActivityListener('npm', 100);
+// ************************************ //
+//         PAYMENT INFO SECTION         //
+// ************************************ //
 
-function isValidActivity() {
-	const $activities = $('.activities input');
-	const $errorHTML = $('<p class="error-message">Please select at least one activity.</p>');
-	if($activities.filter(':checked').length) {
-		$('.activities > .error').remove();
-		return true;
-	}
-	else {
-		if($('.activities > .error-message').length === 0)
-			$('.activities legend').after($errorHTML);
-		return false;
-	}
-}
-
-// 'Payment Info' section
+// Add IDs to paypal and bitcoin paragraphs for easy selection
 $('#credit-card').next().attr('id', 'paypal');
 $('#credit-card').next().next().attr('id', 'bitcoin');
+
 const $payment = $('#payment');
 const $ccDiv = $('#credit-card');
 const $paypalDiv = $('#paypal');
 const $bitcoinDiv = $('#bitcoin');
 
+// Default credit card option as selected and hide others
 $payment.prop('selectedIndex', 1);
 $paypalDiv.hide();
 $bitcoinDiv.hide();
 
+// On payment type change, display the correct payment type fields or info
 $payment.change(() => {
 	const val = $('#payment option').filter(':selected').val();
 	switch(val) {
@@ -167,27 +180,57 @@ $payment.change(() => {
 	}
 });
 
+// ************************************ //
+// FORM VALIDATION FUNCTIONS AND EVENTS //
+// ************************************ //
+
+// EFFECTS: Compares the regEx to the input val and returns true if matched
+//          Adds an error class and appends an error message when not matched
 function isValidInput($input, regEx, val, message='') {
+
 	if(regEx.test(val)) {
+		// Remove possible error class and error message when test passes
 		$input.removeClass('error');
+		
 		if($input.prev().filter('.error-message').length !== 0) {
 			$input.prev().remove();
 		}
+		
 		return true;
 	}
 	else {
 		$input.addClass('error');
+		
+		// Check for empty versus malformatted input, display appropriate message
 		if(val === '') {
 			message = ('Please enter your ').concat(message);
 		}
 		else {
 			message = 'Your ' + message + ' is formatted incorrectly'
 		}
+
+		// Check for existence of error message, add html to document, or change text
 		if($input.prev().filter('.error-message').length === 0)
 			$input.before('<p class="error-message">'+ message +'</p>');
 		else {
 			$input.prev().filter('.error-message').text(message);
 		}
+
+		return false;
+	}
+
+}
+
+function isValidActivity() {
+	const $activities = $('.activities input');
+	const $errorHTML = $('<p class="error-message">Please select at least one activity.</p>');
+	if($activities.filter(':checked').length) {
+		$('.activities > .error').remove();
+		return true;
+	}
+	else {
+		if($('.activities > .error-message').length === 0)
+			$('.activities legend').after($errorHTML);
 		return false;
 	}
 }
