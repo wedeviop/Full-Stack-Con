@@ -112,13 +112,13 @@ addActivityListener('npm', 100);
 
 function isValidActivity() {
 	const $activities = $('.activities input');
-	const $errorHTML = $('<p class="error" style="margin-top: 0px; color: red">Please select at least one activity.</p>');
+	const $errorHTML = $('<p class="error-message">Please select at least one activity.</p>');
 	if($activities.filter(':checked').length) {
 		$('.activities > .error').remove();
 		return true;
 	}
 	else {
-		if($('.activities > .error').length === 0)
+		if($('.activities > .error-message').length === 0)
 			$('.activities legend').after($errorHTML);
 		return false;
 	}
@@ -167,16 +167,42 @@ $payment.change(() => {
 	}
 });
 
-function isValidInput($input, regEx, val) {
+function isValidInput($input, regEx, val, message='') {
 	if(regEx.test(val)) {
 		$input.removeClass('error');
+		if($input.prev().filter('.error-message').length !== 0) {
+			$input.prev().remove();
+		}
 		return true;
 	}
 	else {
 		$input.addClass('error');
+		if(val === '') {
+			message = ('Please enter your ').concat(message);
+		}
+		else {
+			message = 'Your ' + message + ' is formatted incorrectly'
+		}
+		if($input.prev().filter('.error-message').length === 0)
+			$input.before('<p class="error-message">'+ message +'</p>');
+		else {
+			$input.prev().filter('.error-message').text(message);
+		}
 		return false;
 	}
 }
+
+function realtimeValidation() {
+	const nameRegEx = /[a-zA-Z]{1,}/;
+
+	const $emailInput = $('#mail');
+	const emailRegEx = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+	$nameInput.bind('input', () => {isValidInput($nameInput, nameRegEx, $nameInput.val(), 'name')});
+	$emailInput.bind('input', () => {isValidInput($emailInput, emailRegEx, $emailInput.val(), 'email')});
+}
+
+realtimeValidation();
 
 function validateForm() {
 	const nameRegEx = /[a-zA-Z]{1,}/;
@@ -187,35 +213,35 @@ function validateForm() {
 	const emailVal = $emailInput.val();
 	
 	const $ccInput = $('#cc-num');
-	const ccRegEx = /[0-9]{13,16}/;
+	const ccRegEx = /^[0-9]{13,16}$/;
 	const ccVal = $ccInput.val();
 	
 	const $zipInput = $('#zip');
-	const zipRegEx = /[0-9]{5}/;
+	const zipRegEx = /^[0-9]{5}$/;
 	const zipVal = $zipInput.val();
 	
 	const $cvvInput = $('#cvv');
-	const cvvRegEx = /[0-9]{3}/;
+	const cvvRegEx = /^[0-9]{3}$/;
 	const cvvVal = $cvvInput.val();
 
 	let isValid = true;
-	if(!isValidInput($nameInput, nameRegEx, nameVal)) {
+	if(!isValidInput($nameInput, nameRegEx, nameVal, 'name')) {
 		isValid = false;
 	}
-	if(!isValidInput($emailInput, emailRegEx, emailVal)) {
+	if(!isValidInput($emailInput, emailRegEx, emailVal, 'email')) {
 		isValid = false;
 	}
 	if(!isValidActivity()) {
 		isValid = false;
 	}
 	if($('#payment option').filter(':selected').val() === 'credit card') {
-		if(!isValidInput($ccInput, ccRegEx, ccVal)) {
+		if(!isValidInput($ccInput, ccRegEx, ccVal, 'card number')) {
 			isValid = false;
 		}
-		if(!isValidInput($zipInput, zipRegEx, zipVal)) {
+		if(!isValidInput($zipInput, zipRegEx, zipVal, 'zip code')) {
 			isValid = false;
 		}
-		if(!isValidInput($cvvInput, cvvRegEx, cvvVal)) {
+		if(!isValidInput($cvvInput, cvvRegEx, cvvVal, 'CVV')) {
 			isValid = false;
 		}
 	}
@@ -231,10 +257,3 @@ $('form').submit((ev) => {
 		ev.preventDefault();
 	}
 });
-
-
-
-
-
-
-

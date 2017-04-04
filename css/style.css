@@ -147,6 +147,12 @@ button:hover {
 	border-color: red;
 }
 
+.error-message {
+	margin: 0px 0px 5px 0px;
+	color: red;
+	font-size: 0.9em;
+}
+
 /* ================================= 
   Helper Classes
 ==================================== */
