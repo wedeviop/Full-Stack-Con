@@ -1,34 +1,16 @@
-// 'Basic Info' section
-$('#name').focus();
-function checkName() {
-	const nameVal = $('#name').val();
-	if(nameVal === '') {
-		$('#name').css('border-color', 'red');
-		return true;
-	}
-	else {
-		$('#name').css('border-color', '#c1deeb');
-		return false;
-	}
-}
-
-function checkEmail() {
-	const emailRegEx = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-	const emailVal = $('#mail').val();
-	if(!emailRegEx.test(emailVal)) {
-		$('#mail').css('border-color', 'red');
-		return false;
-	}
-	else {
-		$('#mail').css('border-color', '#c1deeb');
-		return true;
-	}
-}
+// "Basic Info" section
+const $nameInput = $('#name');
+// Focus the Name input field when document loads
+$nameInput.focus();
 
 // "Job Role" section of the form
 const $title = $('#title');
 const $otherTitle = $('#other-title');
+
+// Remove the Other Title input field once document loads
 $otherTitle.remove();
+
+// Event listener for adding Other Title input field when user selects "Other"
 $title.change(() => {
 	const val = $('#title option').filter(':selected').val();
 	if(val === 'other') {
@@ -41,10 +23,11 @@ $title.change(() => {
 
 // "T-Shirt Info" section of the form
 const $colorsDiv = $('#colors-js-puns');
+const $colorSelect = $('#color');
 const $colorOpts = $('#color option');
 const $jsPunsOpts = $colorOpts.slice(0,3);
 const $iHeartJSOpts = $colorOpts.slice(3,6);
-const regEx = /\s*\(.*/;
+const designTypeRegEx = /\s*\(.*/;
 
 // First, hide the color section
 $colorsDiv.hide();
@@ -52,40 +35,45 @@ $colorsDiv.hide();
 // Second, change the text to only show the color name
 for(let i = 0; i < $colorOpts.length; i += 1) {
 	const colorName = $colorOpts[i].innerHTML;
-	$colorOpts[i].innerHTML = colorName.replace(regEx, '');
+	$colorOpts[i].innerHTML = colorName.replace(designTypeRegEx, '');
 }
-
-// Third, save the groups for later and remove them from the page
-$colorOpts.remove();
 
 // Finally, on t-shirt design change, add the correct group of colors back
 $('#design').change(() => {
 	const val = $('#design option').filter(':selected').val();
+	
 	$colorsDiv.show();
+	// Remove any lingering options
 	$colorOpts.remove();
+
+	// Only append appropriate group of options	
 	if(val === 'js puns') {
-		$('#color').append($jsPunsOpts);
+		$colorSelect.append($jsPunsOpts);
 	}
 	else if(val === 'heart js') {
-		$('#color').append($iHeartJSOpts);
+		$colorSelect.append($iHeartJSOpts);
 	}
 	else {
 		$colorsDiv.hide();
 	}
-	$('#color').prop('selectedIndex', 0);
+	$colorSelect.prop('selectedIndex', 0);
 });
 
 // "Activities" section of the form
 let total = 0;
+// append html elements that displays the total cost of activities
 const $totalHTML = $('<div class="total"><p></p></div>');
 $('.activities').append($totalHTML);
 
+// EFFECTS: adds a change listener to an activity checkbox,
+//          when checked, calculates the price of the total and updates the html text
 function addActivityListener(activityName, price, conflictName = '') {
 	const $activity = $('.activities input[name=' + activityName + ']');
 	$activity.change(() => {
 		if($activity.is(':checked')) {
 			total += price;
 			$('.total p').text('Total: $' + total);
+			// in case of conflict, toggle the conflicting activity
 			if(conflictName !== '') {
 				toggleActivity(conflictName, false);
 			}
@@ -100,6 +88,7 @@ function addActivityListener(activityName, price, conflictName = '') {
 	});
 }
 
+// EFFECTS: toggles the activity to be enabled or disabled based on "enable" boolean
 function toggleActivity(activityName, enable) {
 	const $activity = $('.activities input[name=' + activityName + ']');
 	if(enable) {
@@ -112,6 +101,7 @@ function toggleActivity(activityName, enable) {
 	}
 }
 
+// Adds all the listeners for the activities checkboxes
 addActivityListener('all', 200);
 addActivityListener('js-frameworks', 100, 'express');
 addActivityListener('js-libs', 100, 'node');
@@ -120,15 +110,17 @@ addActivityListener('node', 100, 'js-libs');
 addActivityListener('build-tools', 100);
 addActivityListener('npm', 100);
 
-function checkActivities() {
+function isValidActivity() {
 	const $activities = $('.activities input');
-	if($activities.filter(':checked').length === 0) {
-		$('.activities legend').after($('<p class="error" style="margin-top: 0px; color: red">Please select at least one activity.</p>'));
-		return false;
-	}
-	else {
+	const $errorHTML = $('<p class="error" style="margin-top: 0px; color: red">Please select at least one activity.</p>');
+	if($activities.filter(':checked').length) {
 		$('.activities > .error').remove();
 		return true;
+	}
+	else {
+		if($('.activities > .error').length === 0)
+			$('.activities legend').after($errorHTML);
+		return false;
 	}
 }
 
@@ -175,67 +167,64 @@ $payment.change(() => {
 	}
 });
 
-function checkCreditCardNumber() {
+function isValidInput($input, regEx, val) {
+	if(regEx.test(val)) {
+		$input.removeClass('error');
+		return true;
+	}
+	else {
+		$input.addClass('error');
+		return false;
+	}
+}
+
+function validateForm() {
+	const nameRegEx = /[a-zA-Z]{1,}/;
+	const nameVal = $nameInput.val();
+
+	const $emailInput = $('#mail');
+	const emailRegEx = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+	const emailVal = $emailInput.val();
+	
 	const $ccInput = $('#cc-num');
-	const ccNumRegEx = /[0-9]{13,16}/;
+	const ccRegEx = /[0-9]{13,16}/;
 	const ccVal = $ccInput.val();
-	if(!ccNumRegEx.test(ccVal)) {
-		$ccInput.css('border-color', 'red');
-		return false;
-	}
-	else {
-		$ccInput.css('border-color', '#c1deeb');
-		return true;
-	}
-}
-
-function checkZipCode() {
-	const zipRegEx = /[0-9]{5}/;
+	
 	const $zipInput = $('#zip');
+	const zipRegEx = /[0-9]{5}/;
 	const zipVal = $zipInput.val();
-	if(!zipRegEx.test(zipVal)) {
-		$zipInput.css('border-color', 'red');
-		return false;
-	}
-	else {
-		$zipInput.css('border-color', '#c1deeb');
-		return true;
-	}
-}
-
-function checkCVV() {
-	const cvvRegEx = /[0-9]{3}/;
+	
 	const $cvvInput = $('#cvv');
+	const cvvRegEx = /[0-9]{3}/;
 	const cvvVal = $cvvInput.val();
-	if(!cvvRegEx.test(cvvVal)) {
-		$cvvInput.css('border-color', 'red');
-		return false;
-	}
-	else {
-		$cvvInput.css('border-color', '#c1deeb');
-		return true;
-	}
-}
 
-function runChecks() {
-	if(!checkName())
-		return false;
-	else if(!checkEmail())
-		return false;
-	else if(!checkActivities())
-		return false;
-	else if(!checkCreditCardNumber())
-		return false;
-	else if(!checkZipCode())
-		return false;
-	else if(!checkCVV())
-		return false;
-	else
-		return true;
+	let isValid = true;
+	if(!isValidInput($nameInput, nameRegEx, nameVal)) {
+		isValid = false;
+	}
+	if(!isValidInput($emailInput, emailRegEx, emailVal)) {
+		isValid = false;
+	}
+	if(!isValidActivity()) {
+		isValid = false;
+	}
+	if($('#payment option').filter(':selected').val() === 'credit card') {
+		if(!isValidInput($ccInput, ccRegEx, ccVal)) {
+			isValid = false;
+		}
+		if(!isValidInput($zipInput, zipRegEx, zipVal)) {
+			isValid = false;
+		}
+		if(!isValidInput($cvvInput, cvvRegEx, cvvVal)) {
+			isValid = false;
+		}
+	}
+
+	return isValid;
 }
 
 $('form').submit((ev) => {
-	if(runChecks()) {
+	if(validateForm()) {
 		return;
 	}
 	else {

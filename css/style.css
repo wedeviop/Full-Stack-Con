@@ -113,14 +113,6 @@ button:hover {
 	background: #184c62;
 }
 
-.total p {
-	margin-bottom: 0px;
-}
-
-.disabled {
-   color: darkgrey;
-}
-
 /* ================================= 
   Page Styles
 ==================================== */
@@ -141,6 +133,18 @@ button:hover {
 
 .credit-card {
 	margin-top: 1.25em;
+}
+
+.total p {
+	margin-bottom: 0px;
+}
+
+.disabled {
+   color: darkgrey;
+}
+
+.error {
+	border-color: red;
 }
 
 /* ================================= 
