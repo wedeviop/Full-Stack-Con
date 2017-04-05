@@ -221,9 +221,14 @@ function isValidInput($input, regEx, val, message='') {
 
 }
 
-function isValidActivity() {
+// EFFECTS: Checks for at least one selected (checked) activity, returns false otherwise
+//          Handles error message adding/removing depending on check
+function isAttendingActivity() {
+
 	const $activities = $('.activities input');
 	const $errorHTML = $('<p class="error-message">Please select at least one activity.</p>');
+	
+	// If there is at least 1 checked activity, returns true
 	if($activities.filter(':checked').length) {
 		$('.activities > .error').remove();
 		return true;
@@ -235,19 +240,25 @@ function isValidActivity() {
 	}
 }
 
+// EFFECTS: Call this function in order to add real-time form validation
+//          Currently only supports Name and Email input fields
 function realtimeValidation() {
+
 	const nameRegEx = /[a-zA-Z]{1,}/;
 
 	const $emailInput = $('#mail');
 	const emailRegEx = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+	// These listeners bind to input events, and check the validity of each input
 	$nameInput.bind('input', () => {isValidInput($nameInput, nameRegEx, $nameInput.val(), 'name')});
 	$emailInput.bind('input', () => {isValidInput($emailInput, emailRegEx, $emailInput.val(), 'email')});
 }
 
-realtimeValidation();
 
+// EFFECTS: Calls input validation functions and returns true if all pass
+//          If one or more validation functions fail, the function returns false
 function validateForm() {
+
 	const nameRegEx = /[a-zA-Z]{1,}/;
 	const nameVal = $nameInput.val();
 
@@ -268,15 +279,19 @@ function validateForm() {
 	const cvvVal = $cvvInput.val();
 
 	let isValid = true;
+
+	// Each condition calls valid check. If the check returns false, we flip the isValid flag
 	if(!isValidInput($nameInput, nameRegEx, nameVal, 'name')) {
 		isValid = false;
 	}
 	if(!isValidInput($emailInput, emailRegEx, emailVal, 'email')) {
 		isValid = false;
 	}
-	if(!isValidActivity()) {
+	if(!isAttendingActivity()) {
 		isValid = false;
 	}
+
+	// Only check for credit card validation if "Credit Card" payment type is selected
 	if($('#payment option').filter(':selected').val() === 'credit card') {
 		if(!isValidInput($ccInput, ccRegEx, ccVal, 'card number')) {
 			isValid = false;
@@ -289,9 +304,14 @@ function validateForm() {
 		}
 	}
 
+	// Return the flag, will be false if any of the tests failed
 	return isValid;
 }
 
+// Call the function for enabling real-time validation on the form
+realtimeValidation();
+
+// Listener on form submission, validates form fields, otherwise, prevents submission
 $('form').submit((ev) => {
 	if(validateForm()) {
 		return;
