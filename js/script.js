@@ -230,7 +230,7 @@ function isAttendingActivity() {
 	
 	// If there is at least 1 checked activity, returns true
 	if($activities.filter(':checked').length) {
-		$('.activities > .error').remove();
+		$('.activities > .error-message').remove();
 		return true;
 	}
 	else {
